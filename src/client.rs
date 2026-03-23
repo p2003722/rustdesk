@@ -62,7 +62,7 @@ use hbb_common::{
     sodiumoxide::{base64, crypto::sign},
     timeout,
     tokio::{
-        self，
+        self,
         net::UdpSocket,
         sync::{
             mpsc::{unbounded_channel, UnboundedReceiver},
@@ -74,7 +74,7 @@ use hbb_common::{
 };
 pub use helper::*;
 use scrap::{
-    codec::Decoder，
+    codec::Decoder,
     record::{Recorder, RecorderContext},
     CodecFormat, ImageFormat, ImageRgb, ImageTexture,
 };
