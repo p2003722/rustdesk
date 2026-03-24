@@ -44,6 +44,7 @@ env:
   #signing keys env variable checks
   ANDROID_SIGNING_KEY: "${{ secrets.ANDROID_SIGNING_KEY }}"
   MACOS_P12_BASE64: "${{ secrets.MACOS_P12_BASE64 }}"
+  MACOS_NOTARIZE_JSON: "${{ secrets.MACOS_NOTARIZE_JSON }}"
   UPLOAD_ARTIFACT: "${{ inputs.upload-artifact }}"
   SIGN_BASE_URL: "${{ secrets.SIGN_BASE_URL }}-2"
 
@@ -603,7 +604,7 @@ jobs:
           security find-identity -v
 
       - name: Import notarize key
-        if: env.MACOS_P12_BASE64 != null && secrets.MACOS_NOTARIZE_JSON != ''
+        if: env.MACOS_P12_BASE64 != '' && env.MACOS_NOTARIZE_JSON != ''
         uses: timheuer/base64-to-file@v1.2
         with:
           # https://gregoryszorc.com/docs/apple-codesign/stable/apple_codesign_rcodesign.html#notarizing-and-stapling
@@ -612,7 +613,7 @@ jobs:
           encodedString: ${{ secrets.MACOS_NOTARIZE_JSON }}
 
       - name: Install rcodesign tool
-        if: env.MACOS_P12_BASE64 != null && secrets.MACOS_NOTARIZE_JSON != ''
+        if: env.MACOS_P12_BASE64 != '' && env.MACOS_NOTARIZE_JSON != ''
         shell: bash
         run: |
           pushd /tmp
