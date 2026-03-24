@@ -535,6 +535,15 @@ jobs:
           # flutter build ipa --release --obfuscate --split-debug-info=./split-debug-info --no-codesign
           # for easy debugging
           flutter build ipa --release --no-codesign
+          # Ensure the ipa directory exists even when --no-codesign is used
+          mkdir -p build/ios/ipa
+          # The .xcarchive is generated; export it to .ipa
+          if [ -d "build/ios/archive/Runner.xcarchive" ] && [ ! -f build/ios/ipa/*.ipa ]; then
+            xcodebuild -exportArchive \
+              -archivePath build/ios/archive/Runner.xcarchive \
+              -exportOptionsPlist ios/ExportOptions.plist \
+              -exportPath build/ios/ipa/ || true
+          fi
 
       - name: Upload Artifacts
         if: env.UPLOAD_ARTIFACT == 'true'
@@ -590,7 +599,7 @@ jobs:
           submodules: recursive
 
       - name: Import the codesign cert
-        if: env.MACOS_P12_BASE64 != null
+        if: env.MACOS_P12_BASE64 != ''
         uses: apple-actions/import-codesign-certs@v1
         with:
           p12-file-base64: ${{ secrets.MACOS_P12_BASE64 }}
@@ -598,7 +607,7 @@ jobs:
           keychain: rustdesk
 
       - name: Check sign and import sign key
-        if: env.MACOS_P12_BASE64 != null
+        if: env.MACOS_P12_BASE64 != ''
         run: |
           security default-keychain -s rustdesk.keychain
           security find-identity -v
@@ -738,7 +747,7 @@ jobs:
           path: rustdesk-${{ env.VERSION }}-${{ matrix.job.arch }}.dmg # can not upload the directory directly or tar.gz, which destroy the link structure, causing the codesign failed
 
       - name: Codesign app and create signed dmg
-        if: env.MACOS_P12_BASE64 != null && env.UPLOAD_ARTIFACT == 'true'
+        if: env.MACOS_P12_BASE64 != '' && env.UPLOAD_ARTIFACT == 'true'
         run: |
           # Patch create-dmg to give more attempts to unmount image
           CREATE_DMG="$(command -v create-dmg)"
