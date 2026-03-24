@@ -775,6 +775,13 @@ jobs:
               mv "$name" "${name%%.dmg}-${{ matrix.job.arch }}.dmg"
           done
 
+      - name: Upload signed macOS DMG
+        if: env.MACOS_P12_BASE64 != '' && env.UPLOAD_ARTIFACT == 'true'
+        uses: actions/upload-artifact@master
+        with:
+          name: rustdesk-signed-macos-${{ matrix.job.arch }}
+          path: rustdesk-*-${{ matrix.job.arch }}.dmg
+
       - name: Publish DMG package
         if: env.UPLOAD_ARTIFACT == 'true'
         uses: softprops/action-gh-release@v1
